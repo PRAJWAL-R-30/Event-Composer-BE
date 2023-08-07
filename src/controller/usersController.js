@@ -1,5 +1,12 @@
 const db = require('../config/db.config');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { ObjectId } = require('mongodb');
+
+
+const getToken = (user) => {
+    return "jwt-token"
+}
 
 exports.addUser = async (req, res, next) => {
     try {
@@ -43,10 +50,38 @@ exports.userLogin = async (req, res, next) => {
 
         delete user.password;
 
-        return res.send(user).status(200);
+        jwt.sign({user: user}, process.env.JWT_SECRET_KEY, (err, token) => {
+            console.log(token);
+            res.json({
+                token
+            }).status(200).cookie('jwt', token);
+        })
+
+        return res;
 
     } catch(err) {
         console.log("Error on users Controller: userLogin Err = ", err);
         return res.json({ error: err, status: 500 }).status(500);
+    }
+};
+
+exports.getUserDetails = async (req, res, next) => {
+    try {
+        const userId = req.user._id;
+        console.log(userId);
+
+        if (!userId) {
+            return res.status(401).json({error: 'User Authentication Failed'});
+        }
+
+        const usersCollection = await db.collection('users');
+        const userDetails = await usersCollection.findOne({_id: new ObjectId(userId)});
+        delete userDetails.password;
+
+        res.send(userDetails).status(200);
+
+    } catch(error) {
+        console.log(error);
+        return res.json({ error: error, status: 500 }).status(500);      
     }
 }

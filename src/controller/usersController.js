@@ -25,7 +25,12 @@ exports.addUser = async (req, res, next) => {
         const userDetails = await usersCollection.findOne({_id: response.insertedId}); // Get the added user details from the response
         delete userDetails.password;
 
-        res.send(userDetails).status(204);
+        jwt.sign({user: userDetails}, process.env.JWT_SECRET_KEY, (err, token) => {
+            console.log(token);
+            res.json({
+                token
+            }).status(200);
+        })
     } catch (err) {
         console.log("Error on users Controller: addUser Err = ", err);
         return res.json({ error: err, status: 500 }).status(500);
@@ -54,7 +59,7 @@ exports.userLogin = async (req, res, next) => {
             console.log(token);
             res.json({
                 token
-            }).status(200).cookie('jwt', token);
+            }).status(200);
         })
 
         return res;

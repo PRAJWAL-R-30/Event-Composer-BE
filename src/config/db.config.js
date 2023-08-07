@@ -1,7 +1,6 @@
 const { MongoClient } = require("mongodb");
-require('../../env');
 
-const uri = process.env.MONOGOCONNECTIONURI || "";
+const uri = process.env.MONGOCONNECTIONURI || "";
 
 const client = new MongoClient(uri);
 

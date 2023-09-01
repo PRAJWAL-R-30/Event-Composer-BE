@@ -30,7 +30,7 @@ exports.addEvent = async (req, res, next) => {
       eventVenue: req.body.eventVenue,
       isMultiEvent: req.body.isMultiEvent,
       totalBudget: req.body.totalBudget,
-      userId: new ObjectId(req.user._id)
+      userId: new ObjectId(req.user._id),
     };
 
     const eventsResponse = await eventsCollection.insertOne(newEvent);
@@ -69,14 +69,18 @@ exports.getEventDetails = async (req, res, next) => {
   try {
     const eventCollection = await db.collection("events");
     console.log(req.params.id);
-    let event = await eventCollection.findOne({_id: new ObjectId(req.params.id)});
+    let event = await eventCollection.findOne({
+      _id: new ObjectId(req.params.id),
+    });
     console.log(event);
 
     const subEventsCollection = await db.collection("subEvents");
-    if(event.isMultiEvent) {
-      event.subEvents = await subEventsCollection.find({eventId: new ObjectId(event._id)}).toArray();
+    if (event.isMultiEvent) {
+      event.subEvents = await subEventsCollection
+        .find({ eventId: new ObjectId(event._id) })
+        .toArray();
     }
-    
+
     res.send(event).status(200);
   } catch (err) {
     console.log("Error on events Controller: GetEventDetails Err = ", err);
@@ -90,12 +94,14 @@ exports.updatBasicEventDetails = async (req, res, next) => {
     const updateFields = req.body;
     const eventCollection = await db.collection("events");
 
-    await eventCollection.updateOne({_id: new ObjectId(id)}, {$set: updateFields});
+    await eventCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateFields }
+    );
 
-    res.status(202).json({message: 'Updated Successfully'});
-
+    res.status(202).json({ message: "Updated Successfully" });
   } catch (err) {
-    console.log("Error on events Controller: GetEventDetails Err = ", err);
+    console.log("Error on events Controller: updatBasicEventDetails Err = ", err);
     return res.json({ error: err, status: 500 }).status(500);
   }
 };
@@ -103,17 +109,33 @@ exports.updatBasicEventDetails = async (req, res, next) => {
 exports.updateTotalBudget = async (req, res, next) => {
   try {
     const id = req.params.id;
-    console.log(id);
     const newBudget = req.body.totalBudget;
-    console.log(req.body.totalBudget);
     const eventCollection = await db.collection("events");
 
-    const response = await eventCollection.updateOne({_id: new ObjectId(id)}, {$set: {totalBudget: newBudget}});
+    const response = await eventCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { totalBudget: newBudget } }
+    );
     console.log("Response --> ", response);
 
-    res.json({totalBudget: newBudget}).status(200);
+    res.json({ totalBudget: newBudget }).status(200);
   } catch (err) {
-    console.log("Error on events Controller: GetEventDetails Err = ", err);
+    console.log("Error on events Controller: updateTotalBudget Err = ", err);
     return res.json({ error: err, status: 500 }).status(500);
   }
 };
+
+exports.deleteEvent = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const eventCollection = await db.collection("events");
+
+    await eventCollection.deleteOne({ _id: new ObjectId(id) });
+
+    res.status(202).json({ message: "Deleted Successfully" });
+  } catch (err) {
+    console.log("Error on events Controller: deleteEvent Err = ", err);
+    return res.json({ error: err, status: 500 }).status(500);
+  }
+};
+

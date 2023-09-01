@@ -6,8 +6,7 @@ dotenv.config();
 
 const eventsRoutes = require('./src/routes/eventsRoutes');
 const usersRoutes = require('./src/routes/usersRoutes');
-
-
+const subEventsRoutes = require('./src/routes/subEventsRoutes');
 
 const port = process.env.PORT || 3001;
   
@@ -17,7 +16,7 @@ app.use(cors());
 //Routes
 app.use("/events/", eventsRoutes);
 app.use("/users/", usersRoutes);
-
+app.use("/subEvents/", subEventsRoutes);
 
 // app.get("/getEvents", async(req, res) => {
 //   let collection = await db.collection('events');
